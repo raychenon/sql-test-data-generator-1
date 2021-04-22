@@ -10,6 +10,10 @@
          alt = "Build Status">
   </a>
 
+  <a href="https://codecov.io/gh/quick-perf/sql-test-data-generator">
+    <img src="https://codecov.io/gh/quick-perf/sql-test-data-generator/branch/main/graph/badge.svg?token=U475ES0JIL"/>
+  </a>
+
 ## Why using *SQL test data generator*?
 Writing datasets with SQL  may be tedious and time-consuming because of database integrity constraints.
 
