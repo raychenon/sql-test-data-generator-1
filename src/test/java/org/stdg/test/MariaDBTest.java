@@ -428,39 +428,36 @@ public class MariaDBTest {
         SQL_EXECUTOR.execute(insertScript);
         assertThat(playerTable).withScript(insertScript)
                                .hasNumberOfRows(1);
-                               //.row(0).hasValues("2012-09-17 19:56:47.0"); ???
         assertThat(insertScript).contains("'2012-09-17 19:56:47.0'");
 
-        // SQL_EXECUTOR.execute("@@session.time_zone;"); get this value
     }
 
     @Test public void
     should_generate_an_insert_statement_with_a_time_type_with_timezone_type() {
-    // "TIME type with TIMEZONE" is unsupported by MariaDB https://mariadb.com/kb/en/time/
 
-    // GIVEN
-    TestTable playerTable =
-                buildUniqueTable(DATA_SOURCE
-                                ,"Table"
-                                ,"col TIME"
-                                )
-                .create();
+        // GIVEN
+        TestTable playerTable =
+                    buildUniqueTable(DATA_SOURCE
+                                    ,"Table"
+                                    ,"col TIME"
+                                    )
+                    .create();
 
-    SQL_EXECUTOR.execute("SET time_zone = 'America/New_York';");
-    playerTable.insertValues("'23:59:59'");
+        SQL_EXECUTOR.execute("SET time_zone = 'America/New_York';");
+        playerTable.insertValues("'23:59:59'");
 
-    // WHEN
-    String playerTableName = playerTable.getTableName();
-    String select = "SELECT * FROM " + playerTableName;
-    SqlTestDataGenerator sqlTestDataGenerator = SqlTestDataGenerator.buildFrom(DATA_SOURCE);
-    String insertScript = sqlTestDataGenerator.generateInsertScriptFor(select);
+        // WHEN
+        String playerTableName = playerTable.getTableName();
+        String select = "SELECT * FROM " + playerTableName;
+        SqlTestDataGenerator sqlTestDataGenerator = SqlTestDataGenerator.buildFrom(DATA_SOURCE);
+        String insertScript = sqlTestDataGenerator.generateInsertScriptFor(select);
 
-    // THEN
-    playerTable.recreate();
-    SQL_EXECUTOR.execute(insertScript);
-    assertThat(playerTable).withScript(insertScript)
-                           .hasNumberOfRows(1)
-                           .row(0).hasValues("23:59:59");
+        // THEN
+        playerTable.recreate();
+        SQL_EXECUTOR.execute(insertScript);
+        assertThat(playerTable).withScript(insertScript)
+                               .hasNumberOfRows(1)
+                               .row(0).hasValues("23:59:59");
     }
 
     @Test public void
