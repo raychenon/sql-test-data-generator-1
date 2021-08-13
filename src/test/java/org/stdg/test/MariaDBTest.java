@@ -317,6 +317,7 @@ public class MariaDBTest {
 
     }
 
+    // Currently there is no "timestamp with timezone" ( https://jira.mariadb.org/browse/MDEV-10018 )
 
     @Test public void
     should_generate_an_insert_statement_with_a_date_type() {
@@ -371,95 +372,6 @@ public class MariaDBTest {
         assertThat(insertScript).contains("'2012-09-17 19:56:47.0'");
     }
 
-
-    @Test public void
-    should_generate_an_insert_statement_with_a_timestamp_converted_to_time_zone_type() {
-
-        // GIVEN
-        TestTable playerTable =
-                buildUniqueTable(DATA_SOURCE
-                                , "Table"
-                                , "col TIMESTAMP"
-                                )
-                .create();
-
-        // currently there is no "timestamp with timezone" ( https://jira.mariadb.org/browse/MDEV-10018 )
-        // the trick is to convert the timestamp
-        playerTable.insertValues( "CONVERT_TZ('2012-09-17 19:56:47','GMT','America/New_York')");
-
-        // WHEN
-        String playerTableName = playerTable.getTableName();
-        String select = "SELECT * FROM " + playerTableName;
-        SqlTestDataGenerator sqlTestDataGenerator = SqlTestDataGenerator.buildFrom(DATA_SOURCE);
-        String insertScript = sqlTestDataGenerator.generateInsertScriptFor(select);
-
-        // THEN
-        playerTable.recreate();
-        SQL_EXECUTOR.execute(insertScript);
-        assertThat(playerTable).withScript(insertScript)
-                               .hasNumberOfRows(1);
-
-        // America/New_York is 4 hours behind GMT
-        assertThat(insertScript).contains("'2012-09-17 15:56:47.0'");
-    }
-
-    @Test public void
-    should_generate_an_insert_statement_with_a_timestamp_with_time_zone_type() {
-
-        // GIVEN
-        TestTable playerTable =
-                buildUniqueTable(DATA_SOURCE
-                                ,"Table"
-                                ,"col TIMESTAMP"
-                                )
-                .create();
-
-        SQL_EXECUTOR.execute("SET time_zone = 'UTC';");
-        playerTable.insertValues( "'2012-09-17 19:56:47'");
-
-        // WHEN
-        String playerTableName = playerTable.getTableName();
-        String select = "SELECT * FROM " + playerTableName;
-        SqlTestDataGenerator sqlTestDataGenerator = SqlTestDataGenerator.buildFrom(DATA_SOURCE);
-        String insertScript = sqlTestDataGenerator.generateInsertScriptFor(select);
-
-        // THEN
-        playerTable.recreate();
-        SQL_EXECUTOR.execute(insertScript);
-        assertThat(playerTable).withScript(insertScript)
-                               .hasNumberOfRows(1);
-        assertThat(insertScript).contains("'2012-09-17 19:56:47.0'");
-
-    }
-
-    @Test public void
-    should_generate_an_insert_statement_with_a_time_type_with_timezone_type() {
-
-        // GIVEN
-        TestTable playerTable =
-                    buildUniqueTable(DATA_SOURCE
-                                    ,"Table"
-                                    ,"col TIME"
-                                    )
-                    .create();
-
-        SQL_EXECUTOR.execute("SET time_zone = 'America/New_York';");
-        playerTable.insertValues("'23:59:59'");
-
-        // WHEN
-        String playerTableName = playerTable.getTableName();
-        String select = "SELECT * FROM " + playerTableName;
-        SqlTestDataGenerator sqlTestDataGenerator = SqlTestDataGenerator.buildFrom(DATA_SOURCE);
-        String insertScript = sqlTestDataGenerator.generateInsertScriptFor(select);
-
-        // THEN
-        playerTable.recreate();
-        SQL_EXECUTOR.execute(insertScript);
-        assertThat(playerTable).withScript(insertScript)
-                               .hasNumberOfRows(1)
-                               .row(0).hasValues("23:59:59");
-    }
-
     @Test public void
     should_generate_an_insert_statement_with_a_time_type() {
 
@@ -482,8 +394,8 @@ public class MariaDBTest {
         playerTable.recreate();
         SQL_EXECUTOR.execute(insertScript);
         assertThat(playerTable).withScript(insertScript)
-                .hasNumberOfRows(1)
-                .row(0).hasValues("23:59:59");
+                               .hasNumberOfRows(1)
+                               .row(0).hasValues("23:59:59");
     }
 
 }
